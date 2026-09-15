@@ -1,0 +1,582 @@
+<title>วิเคราะห์เว็บอีเว้นต์อโยธยา หนูน้อยหมวกแดง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* --- warm "temple stone" light palette --- */
+    --plane:        #f4f0e8;
+    --surface:      #fffdf8;
+    --surface-2:    #faf6ec;
+    --ink:          #221c12;
+    --ink-2:        #5b5343;
+    --muted:        #8c8271;
+    --gold:         #b5852a;
+    --gold-soft:    #e7d3a6;
+    --line:         rgba(34,28,18,0.10);
+    --line-2:       rgba(34,28,18,0.06);
+    --shadow:       0 1px 2px rgba(34,28,18,0.06), 0 8px 24px rgba(34,28,18,0.06);
+
+    /* --- dataviz functional palette (light) --- */
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+    --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
+    --good:#0ca30c; --warning:#c98a00; --serious:#d9662e; --critical:#d03b3b;
+    --track: rgba(34,28,18,0.07);
+
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --plane:     #0f0c07;
+      --surface:   #1a150d;
+      --surface-2: #221b10;
+      --ink:       #f6efe0;
+      --ink-2:     #cabfa8;
+      --muted:     #948a76;
+      --gold:      #e6bd5f;
+      --gold-soft: #4a3a19;
+      --line:      rgba(246,239,224,0.12);
+      --line-2:    rgba(246,239,224,0.07);
+      --shadow:    0 1px 2px rgba(0,0,0,0.4), 0 10px 30px rgba(0,0,0,0.45);
+
+      --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+      --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+      --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#e05555;
+      --track: rgba(246,239,224,0.09);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --plane:     #0f0c07;
+    --surface:   #1a150d;
+    --surface-2: #221b10;
+    --ink:       #f6efe0;
+    --ink-2:     #cabfa8;
+    --muted:     #948a76;
+    --gold:      #e6bd5f;
+    --gold-soft: #4a3a19;
+    --line:      rgba(246,239,224,0.12);
+    --line-2:    rgba(246,239,224,0.07);
+    --shadow:    0 1px 2px rgba(0,0,0,0.4), 0 10px 30px rgba(0,0,0,0.45);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+    --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#e05555;
+    --track: rgba(246,239,224,0.09);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 600px at 100% -10%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%),
+      var(--plane);
+    color: var(--ink);
+    font-family: 'Sarabun', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-block: 40px 72px;
+    padding-inline: 20px;
+  }
+
+  .num { font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+  /* ---------- header ---------- */
+  .eyebrow {
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before {
+    content: ""; width: 26px; height: 2px; background: var(--gold); border-radius: 2px;
+  }
+  h1 {
+    font-family: 'Kanit', sans-serif;
+    font-weight: 700;
+    font-size: clamp(30px, 6vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  h1 .accent { color: var(--gold); }
+  .lede {
+    font-size: 16px;
+    color: var(--ink-2);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .verdict {
+    margin-top: 22px;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--critical) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--critical) 32%, transparent);
+    color: var(--ink);
+    font-size: 14px; font-weight: 600;
+  }
+  .verdict .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--critical); flex-shrink:0; }
+
+  /* ---------- section ---------- */
+  section { margin-top: 52px; }
+  .sec-head { margin-bottom: 20px; }
+  .sec-kicker {
+    font-family: 'Kanit', sans-serif; font-weight: 600;
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 6px;
+  }
+  h2 {
+    font-family: 'Kanit', sans-serif; font-weight: 600;
+    font-size: clamp(21px, 3.4vw, 27px);
+    margin: 0; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .sec-note { color: var(--ink-2); font-size: 14.5px; margin: 8px 0 0; max-width: 66ch; }
+
+  /* ---------- KPI ---------- */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 30px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    box-shadow: var(--shadow);
+    position: relative; overflow: hidden;
+  }
+  .kpi::before {
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--gold);
+  }
+  .kpi .label {
+    font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; margin: 0 0 8px;
+  }
+  .kpi .value {
+    font-family: 'Kanit', sans-serif; font-weight: 700;
+    font-size: 30px; line-height: 1; color: var(--ink);
+  }
+  .kpi .value small { font-size: 15px; font-weight: 600; color: var(--ink-2); }
+  .kpi .sub { font-size: 12.5px; color: var(--ink-2); margin: 8px 0 0; }
+
+  /* ---------- generic card ---------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card h3 {
+    font-family:'Kanit',sans-serif; font-weight:600; font-size:15px;
+    margin:0 0 4px; letter-spacing:0.01em;
+  }
+  .card .cap { font-size: 12.5px; color: var(--muted); margin: 0 0 18px; }
+
+  /* ---------- bar chart ---------- */
+  .bars { display: flex; flex-direction: column; gap: 14px; }
+  .bar-row .bar-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 12px; margin-bottom: 6px;
+  }
+  .bar-name { font-size: 13.5px; font-weight: 500; color: var(--ink); }
+  .bar-name .tag { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .bar-val { font-size: 13px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+  .track {
+    height: 12px; background: var(--track); border-radius: 6px; overflow: hidden;
+    display: flex;
+  }
+  .fill {
+    height: 100%; border-radius: 6px; min-width: 6px;
+    background: var(--s1);
+  }
+  .fill.s1{background:var(--s1)} .fill.s2{background:var(--s2)} .fill.s3{background:var(--s3)}
+  .fill.gold{background:var(--gold)}
+
+  /* stacked bar */
+  .stack { display:flex; height:14px; border-radius:7px; overflow:hidden; gap:2px; background:transparent; }
+  .stack span { height:100%; }
+  .stack span:first-child{border-radius:7px 0 0 7px} .stack span:last-child{border-radius:0 7px 7px 0}
+  .legend { display:flex; flex-wrap:wrap; gap:14px 20px; margin-top:14px; }
+  .legend .li { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-2); }
+  .legend .sw { width:11px; height:11px; border-radius:3px; flex-shrink:0; }
+
+  /* ---------- feedback themes ---------- */
+  .themes { display: flex; flex-direction: column; gap: 10px; }
+  .theme {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start;
+    padding: 15px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2);
+  }
+  .theme .ic {
+    width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+    font-size: 17px; background: color-mix(in srgb, var(--gold) 14%, transparent); flex-shrink: 0;
+  }
+  .theme .t-title { font-weight: 600; font-size: 14.5px; margin: 0 0 3px; font-family:'Kanit',sans-serif; }
+  .theme .t-body { font-size: 13.5px; color: var(--ink-2); margin: 0; }
+  .theme .t-src { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+  .theme .t-src b { color: var(--ink-2); font-weight: 600; }
+  .sev {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px; white-space: nowrap; align-self: center;
+  }
+  .sev.crit { color: var(--critical); background: color-mix(in srgb, var(--critical) 14%, transparent); }
+  .sev.high { color: var(--serious); background: color-mix(in srgb, var(--serious) 16%, transparent); }
+  .sev.med  { color: var(--warning); background: color-mix(in srgb, var(--warning) 18%, transparent); }
+
+  /* ---------- redemption table ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line-2); }
+  th { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: none; }
+  .pill {
+    font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;
+    background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line);
+  }
+  .rank { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* ---------- recommendations ---------- */
+  .recs { display: flex; flex-direction: column; gap: 12px; }
+  .rec {
+    display: grid; grid-template-columns: auto 1fr; gap: 16px;
+    padding: 18px; border-radius: 13px; border: 1px solid var(--line);
+    background: var(--surface); box-shadow: var(--shadow);
+  }
+  .rec .prio {
+    font-family:'Kanit',sans-serif; font-weight: 700; font-size: 12px;
+    padding: 6px 11px; border-radius: 8px; height: fit-content; white-space: nowrap;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .rec .prio.p1 { background: var(--critical); color: #fff; }
+  .rec .prio.p2 { background: color-mix(in srgb, var(--serious) 88%, black 0%); color: #fff; }
+  .rec .prio.p3 { background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold); border:1px solid color-mix(in srgb,var(--gold) 40%,transparent); }
+  .rec h4 { font-family:'Kanit',sans-serif; font-weight: 600; font-size: 16px; margin: 0 0 6px; }
+  .rec p { margin: 0; font-size: 14px; color: var(--ink-2); }
+  .rec .why {
+    margin-top: 10px; font-size: 12.5px; color: var(--muted);
+    padding-left: 12px; border-left: 2px solid var(--gold-soft);
+  }
+  .rec .why b { color: var(--ink-2); font-weight: 600; }
+
+  /* callout */
+  .callout {
+    margin-top: 14px; padding: 14px 16px; border-radius: 12px;
+    background: color-mix(in srgb, var(--s1) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--s1) 22%, transparent);
+    font-size: 13.5px; color: var(--ink);
+  }
+  .callout b { color: var(--ink); }
+
+  footer {
+    margin-top: 60px; padding-top: 22px; border-top: 1px solid var(--line);
+    font-size: 12.5px; color: var(--muted); display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center;
+  }
+  footer .brand { font-family:'Kanit',sans-serif; font-weight:600; color: var(--ink-2); }
+
+  @media (max-width: 720px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .theme { grid-template-columns: auto 1fr; }
+    .theme .sev { grid-column: 2; justify-self: start; }
+    .rec { grid-template-columns: 1fr; }
+    .rec .prio { justify-self: start; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <p class="eyebrow">TOSM Extreme · Post-Event Analysis</p>
+    <h1>สรุปวิเคราะห์เว็บอีเว้นต์<span class="accent">อโยธยา หนูน้อยหมวกแดง</span></h1>
+    <p class="lede">รวมข้อมูล 3 ชั้น — เสียงผู้เล่น (Feedback), พฤติกรรมการใช้ WP บนกระดานอีเวนต์ และของที่คนแลกจริงในท้องพระคลัง — เพื่อชี้จุดที่ต้องแก้ก่อนออกแบบอีเวนต์รอบถัดไป</p>
+    <div class="verdict"><span class="dot"></span> ภาพรวม: ผู้เล่นส่วนใหญ่ไม่พอใจ — ปัญหาหลักคือ “ราคาแพง + ลิมิตแลกน้อย + ของตกแพทช์”</div>
+  </header>
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <p class="label">WP ที่ใช้ทั้งหมด</p>
+      <div class="value num">5,641,540</div>
+      <p class="sub">รวมทุกกระดาน (Main · Wheel · Shop)</p>
+    </div>
+    <div class="kpi">
+      <p class="label">ผู้เล่นที่เข้าร่วม</p>
+      <div class="value num">854</div>
+      <p class="sub">Unique users ที่ลงกระดานหลัก</p>
+    </div>
+    <div class="kpi">
+      <p class="label">ผู้เล่นที่จ่ายเงิน</p>
+      <div class="value num">103 <small>· 12.1%</small></div>
+      <p class="sub">Paid conversion ค่อนข้างต่ำ</p>
+    </div>
+    <div class="kpi">
+      <p class="label">WP เฉลี่ย / คน</p>
+      <div class="value num">6,606</div>
+      <p class="sub">ARPU (WP) ต่อผู้เล่น 1 คน</p>
+    </div>
+  </div>
+
+  <!-- ===== 1. FEEDBACK ===== -->
+  <section>
+    <div class="sec-head">
+      <p class="sec-kicker">01 — เสียงจากผู้เล่น</p>
+      <h2>Insight จาก Feedback</h2>
+      <p class="sec-note">Feedback มาจากกลุ่ม VIP (พีท, เก็ท, ก็อต, บอมบ์) และหน้าแฟนเพจ ทั้งหมดชี้ไปทางลบและกระจุกอยู่ที่ 5 ประเด็น เรียงตามความรุนแรงที่ควรแก้</p>
+    </div>
+    <div class="themes">
+
+      <div class="theme">
+        <div class="ic">💰</div>
+        <div>
+          <p class="t-title">ราคาไอเทมแลกแพงเกินไป</p>
+          <p class="t-body">เพชรแดงที่ใช้อัปคอสตูม Ayothaya ตัวเก่าเคยใช้ 150 แต้ม รอบนี้ขยับเป็น 300 แต้ม (+100%) หลายคนมองว่าไม่คุ้ม</p>
+          <p class="t-src"><b>แหล่ง:</b> คุณเก็ท · หน้าแฟนเพจ</p>
+        </div>
+        <span class="sev crit">Critical</span>
+      </div>
+
+      <div class="theme">
+        <div class="ic">🔒</div>
+        <div>
+          <p class="t-title">ลิมิตการแลกน้อยเกินไป</p>
+          <p class="t-body">ไอเทมที่ใช้งานเยอะอย่างของตีบวกจำกัดแลกได้แค่ 1 ชิ้น สวนทางกับดีมานด์จริง (ดูข้อมูลท้องพระคลังประกอบ)</p>
+          <p class="t-src"><b>แหล่ง:</b> คุณพีท</p>
+        </div>
+        <span class="sev high">High</span>
+      </div>
+
+      <div class="theme">
+        <div class="ic">🕐</div>
+        <div>
+          <p class="t-title">คอนเทนต์ตกแพทช์ / ของไม่อัปเดต</p>
+          <p class="t-body">ไอเทมบางส่วนยังเป็นของแพทช์เก่า และของใหม่ที่เข้าเกมแล้วไม่ได้ถูกนำมาใส่ในกิจกรรม</p>
+          <p class="t-src"><b>แหล่ง:</b> คุณพีท · หน้าแฟนเพจ</p>
+        </div>
+        <span class="sev high">High</span>
+      </div>
+
+      <div class="theme">
+        <div class="ic">🔑</div>
+        <div>
+          <p class="t-title">ขาดแคลนกุญแจ — อยากได้แพ็คกุญแจเพิ่ม</p>
+          <p class="t-body">Chaos ปัจจุบันยังไม่เปิดถึงอุปกรณ์ล่าสุด ทำให้กุญแจสำหรับทำของขาดหนัก — สอดคล้องกับของที่คนแลกมากที่สุดในอีเวนต์</p>
+          <p class="t-src"><b>แหล่ง:</b> คุณบอมบ์</p>
+        </div>
+        <span class="sev high">High</span>
+      </div>
+
+      <div class="theme">
+        <div class="ic">⬆️</div>
+        <div>
+          <p class="t-title">ขอปรับ Tier ไอเทมให้ตรงแพทช์ปัจจุบัน</p>
+          <p class="t-body">อยากให้ปรับ Belorb Core Fragment : Goddess (หน้าสุ่ม) และ Belorb Core : Goddess (ร้านค้าดวงดาว) เป็นระดับ Celestial</p>
+          <p class="t-src"><b>แหล่ง:</b> คุณก็อต</p>
+        </div>
+        <span class="sev med">Medium</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== 2. SPENDING BEHAVIOR ===== -->
+  <section>
+    <div class="sec-head">
+      <p class="sec-kicker">02 — พฤติกรรมการใช้จ่าย</p>
+      <h2>WP &amp; กระดานอีเวนต์</h2>
+      <p class="sec-note">กระดานหลัก (Main) คือหัวใจของอีเวนต์ ส่วน Wheel และ Shop เป็นตัวเสริมที่คนแตะน้อยลงเรื่อยๆ และแทบไม่มีใครยอมจ่าย WP เพื่อรีเซ็ตกระดาน</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- WP by board -->
+      <div class="card">
+        <h3>WP ที่ใช้ แยกตามประเภทกระดาน</h3>
+        <p class="cap">Main กินสัดส่วนเกือบทั้งหมด — Shop แทบไม่มีผลต่อยอดใช้ WP</p>
+        <div class="bars">
+          <div class="bar-row">
+            <div class="bar-top"><span class="bar-name">Main <span class="tag">· 854 คน</span></span><span class="bar-val num">4,849,506 · 79%</span></div>
+            <div class="track"><div class="fill s1" style="width:100%"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-top"><span class="bar-name">Wheel <span class="tag">· 76 คน</span></span><span class="bar-val num">1,245,040 · 20%</span></div>
+            <div class="track"><div class="fill s2" style="width:25.7%"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-top"><span class="bar-name">Shop <span class="tag">· 26 คน</span></span><span class="bar-val num">12,776 · 0.2%</span></div>
+            <div class="track"><div class="fill s3" style="width:1%"></div></div>
+          </div>
+        </div>
+        <div class="callout">รวมทั้ง 3 กระดาน <b class="num">22,970 ครั้ง</b> การใช้งาน · เฉลี่ย Main <b class="num">24.9</b> ครั้ง/คน — ผู้เล่นเล่นกระดานหลักถี่มาก</div>
+      </div>
+
+      <!-- Participation funnel -->
+      <div class="card">
+        <h3>อัตราการเข้าร่วมแต่ละกระดาน</h3>
+        <p class="cap">ผู้เล่นร่วง (drop-off) แรงเมื่อขยับจาก Main ไป Wheel และ Shop</p>
+        <div class="bars">
+          <div class="bar-row">
+            <div class="bar-top"><span class="bar-name">Main</span><span class="bar-val num">854 · 100%</span></div>
+            <div class="track"><div class="fill gold" style="width:100%"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-top"><span class="bar-name">Wheel</span><span class="bar-val num">76 · 8.9%</span></div>
+            <div class="track"><div class="fill gold" style="width:8.9%"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-top"><span class="bar-name">Shop (ท้องพระคลัง)</span><span class="bar-val num">26 · 3.0%</span></div>
+            <div class="track"><div class="fill gold" style="width:3%"></div></div>
+          </div>
+        </div>
+        <div class="callout">มีแค่ <b class="num">~9%</b> ที่ไปต่อถึง Wheel และ <b class="num">3%</b> ถึงร้านแลกของ — กระดานเสริมยังไม่จูงใจพอให้คนเดินต่อ</div>
+      </div>
+    </div>
+
+    <!-- Reset behavior -->
+    <div class="card" style="margin-top:14px;">
+      <h3>พฤติกรรมการรีเซ็ตกระดาน (Reset)</h3>
+      <p class="cap">รีเซ็ตทั้งหมด 4,751 ครั้ง — เกือบทั้งหมดเป็นรีเซ็ตฟรี มีแค่ส่วนน้อยที่ยอมจ่าย 100 WP</p>
+      <div class="stack" style="margin-top:6px;">
+        <span style="width:95.6%;background:var(--s3)"></span>
+        <span style="width:4.4%;background:var(--s8)"></span>
+      </div>
+      <div class="legend">
+        <span class="li"><span class="sw" style="background:var(--s3)"></span> รีเซ็ตฟรี (0 WP) — 4,541 ครั้ง · 95.6%</span>
+        <span class="li"><span class="sw" style="background:var(--s8)"></span> รีเซ็ตเสียเงิน (100 WP) — 210 ครั้ง · 4.4%</span>
+      </div>
+      <div class="callout">การรีเซ็ตแบบจ่ายเงินรวมแค่ <b class="num">21,000 WP</b> = <b>0.37%</b> ของ WP ทั้งหมด → ผู้เล่นไม่ยอมจ่ายเพื่อรีรอล สะท้อนว่ารางวัลบนกระดาน “ไม่คุ้มพอ” ให้ลุ้นซ้ำ</div>
+    </div>
+  </section>
+
+  <!-- ===== 3. REDEMPTIONS ===== -->
+  <section>
+    <div class="sec-head">
+      <p class="sec-kicker">03 — ของที่คนแลก</p>
+      <h2>ท้องพระคลัง — ผู้เล่นแลกอะไรจริง</h2>
+      <p class="sec-note">รวมการแลก 142 ครั้ง จากผู้เล่น 26 คน กลุ่มเล็กแต่บอกดีมานด์ชัด: <b>76% ของการแลกเป็นของสายฟังก์ชัน/โปรเกรส</b> ไม่ใช่ของแฟชั่น</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- categories -->
+      <div class="card">
+        <h3>สัดส่วนการแลก แยกตามหมวด</h3>
+        <p class="cap">กุญแจดันเจี้ยนมาเป็นอันดับหนึ่งขาดลอย — ตรงกับ Feedback เรื่องขาดกุญแจ</p>
+        <div class="bars">
+          <div class="bar-row"><div class="bar-top"><span class="bar-name">🔑 กุญแจดันเจี้ยน</span><span class="bar-val num">60 · 42%</span></div><div class="track"><div class="fill s1" style="width:100%"></div></div></div>
+          <div class="bar-row"><div class="bar-top"><span class="bar-name">🛠 วัตถุดิบตีบวก (Belorb Stabilizer)</span><span class="bar-val num">26 · 18%</span></div><div class="track"><div class="fill s1" style="width:43.3%"></div></div></div>
+          <div class="bar-row"><div class="bar-top"><span class="bar-name">👗 คอสตูม / แฟชั่น</span><span class="bar-val num">17 · 12%</span></div><div class="track"><div class="fill s1" style="width:28.3%"></div></div></div>
+          <div class="bar-row"><div class="bar-top"><span class="bar-name">🎟 ตั๋วสุ่ม / Mount</span><span class="bar-val num">15 · 11%</span></div><div class="track"><div class="fill s1" style="width:25%"></div></div></div>
+          <div class="bar-row"><div class="bar-top"><span class="bar-name">🏷 Title</span><span class="bar-val num">11 · 8%</span></div><div class="track"><div class="fill s1" style="width:18.3%"></div></div></div>
+          <div class="bar-row"><div class="bar-top"><span class="bar-name">🧪 ไอเทมซ่อม / ดัดแปลง</span><span class="bar-val num">7 · 5%</span></div><div class="track"><div class="fill s1" style="width:11.7%"></div></div></div>
+          <div class="bar-row"><div class="bar-top"><span class="bar-name">📦 อื่นๆ (Silver Box, Cat Lens ฯลฯ)</span><span class="bar-val num">4 · 3%</span></div><div class="track"><div class="fill s1" style="width:6.7%"></div></div></div>
+          <div class="bar-row"><div class="bar-top"><span class="bar-name">🃏 การ์ดบอส</span><span class="bar-val num">2 · 1%</span></div><div class="track"><div class="fill s1" style="width:3.3%"></div></div></div>
+        </div>
+      </div>
+
+      <!-- top items table -->
+      <div class="card">
+        <h3>Top ไอเทมที่ถูกแลกมากสุด</h3>
+        <p class="cap">เรียงตามจำนวนครั้งที่แลก (Total Purchase)</p>
+        <table>
+          <thead><tr><th class="rank">#</th><th>ไอเทม</th><th>หมวด</th><th class="n">แลก</th></tr></thead>
+          <tbody>
+            <tr><td class="rank">1</td><td>Belorb Stabilizer</td><td><span class="pill">ตีบวก</span></td><td class="n">26</td></tr>
+            <tr><td class="rank">2</td><td>Ominous Ruins Key</td><td><span class="pill">กุญแจ</span></td><td class="n">20</td></tr>
+            <tr><td class="rank">3</td><td>Title : แกไม่รอดแน่</td><td><span class="pill">Title</span></td><td class="n">11</td></tr>
+            <tr><td class="rank">4</td><td>Crystal Hall Key Selection</td><td><span class="pill">กุญแจ</span></td><td class="n">10</td></tr>
+            <tr><td class="rank">5</td><td>Memory Stone Key Selection</td><td><span class="pill">กุญแจ</span></td><td class="n">10</td></tr>
+            <tr><td class="rank">6</td><td>Convent Key</td><td><span class="pill">กุญแจ</span></td><td class="n">10</td></tr>
+            <tr><td class="rank">7</td><td>กุญแจ Kepa Festival II</td><td><span class="pill">กุญแจ</span></td><td class="n">10</td></tr>
+            <tr><td class="rank">8</td><td>Ether Crystal : Legendary Ticket</td><td><span class="pill">ตั๋วสุ่ม</span></td><td class="n">8</td></tr>
+            <tr><td class="rank">9</td><td>Noble Popo Mount Stone</td><td><span class="pill">Mount</span></td><td class="n">7</td></tr>
+            <tr><td class="rank">10</td><td>Red Riding Hood Costume</td><td><span class="pill">คอสตูม</span></td><td class="n">5</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px;">
+      <b>จุดเชื่อมสำคัญ:</b> Belorb Stabilizer เป็นของที่ถูกแลกมากที่สุด (26 ครั้ง) แต่ Feedback บอกว่าลิมิตแค่ 1 ชิ้น — ดีมานด์ล้นเพดานชัดเจน ควรปลดล็อกก่อนใคร
+    </div>
+  </section>
+
+  <!-- ===== 4. RECOMMENDATIONS ===== -->
+  <section>
+    <div class="sec-head">
+      <p class="sec-kicker">04 — สิ่งที่ควรทำต่อ</p>
+      <h2>ข้อเสนอปรับปรุงรอบหน้า</h2>
+      <p class="sec-note">เรียงตามลำดับความสำคัญ อิงจาก Feedback + ข้อมูลพฤติกรรมจริง แต่ละข้อผูกกับหลักฐานที่เจอในอีเวนต์นี้</p>
+    </div>
+    <div class="recs">
+
+      <div class="rec">
+        <span class="prio p1">P1 · ด่วน</span>
+        <div>
+          <h4>รีบาลานซ์ราคาไอเทมแลกใหม่</h4>
+          <p>ทบทวนราคาที่กระโดดแรง โดยเฉพาะคอสตูมพรีเมียม (เพชรแดง 150 → 300) ให้กลับมาใกล้เดิม หรือเพิ่ม value ให้สมราคา และเทียบราคากับ WP ที่ผู้เล่นหาได้จริง</p>
+          <p class="why"><b>หลักฐาน:</b> Feedback ราคาแพง (เก็ท, แฟนเพจ) + paid conversion แค่ 12% + คนไม่ยอมจ่ายรีเซ็ต (0.37% ของ WP)</p>
+        </div>
+      </div>
+
+      <div class="rec">
+        <span class="prio p1">P1 · ด่วน</span>
+        <div>
+          <h4>เพิ่มลิมิตการแลกไอเทมดีมานด์สูง</h4>
+          <p>ปลดเพดาน “แลกได้ 1 ชิ้น” สำหรับของตีบวก (Belorb Stabilizer) และกุญแจ ให้แลกได้หลายชิ้น เพราะเป็นของที่คนต้องการมากที่สุด</p>
+          <p class="why"><b>หลักฐาน:</b> Belorb Stabilizer = ของที่แลกมากสุด (26) แต่โดนลิมิต · Feedback คุณพีท</p>
+        </div>
+      </div>
+
+      <div class="rec">
+        <span class="prio p2">P2 · สำคัญ</span>
+        <div>
+          <h4>ใส่แพ็คกุญแจเป็นรางวัลหลัก</h4>
+          <p>เพิ่มแพ็ค/บันเดิลกุญแจ (Ominous Ruins, Crystal Hall, Memory Stone, Convent, Kepa) ให้เป็นแม่เหล็กของอีเวนต์ เพราะเป็นดีมานด์ที่พิสูจน์แล้วทั้งจากข้อมูลและคำขอ</p>
+          <p class="why"><b>หลักฐาน:</b> กุญแจ = 42% ของการแลกทั้งหมด (60 ครั้ง) + คำขอตรงจากคุณบอมบ์</p>
+        </div>
+      </div>
+
+      <div class="rec">
+        <span class="prio p2">P2 · สำคัญ</span>
+        <div>
+          <h4>อัปเดตพูลไอเทมให้ตรงแพทช์</h4>
+          <p>เอาไอเทมตกแพทช์ออก เติมของใหม่ที่เข้าเกมแล้ว และปรับ Belorb Core Fragment : Goddess / Belorb Core : Goddess เป็นระดับ Celestial ตามคำขอ</p>
+          <p class="why"><b>หลักฐาน:</b> Feedback ของตกแพทช์ (พีท, แฟนเพจ) + คำขอปรับ tier (ก็อต)</p>
+        </div>
+      </div>
+
+      <div class="rec">
+        <span class="prio p3">P3 · ทดลอง</span>
+        <div>
+          <h4>ยกระดับ Monetization ของกระดานเสริม</h4>
+          <p>Wheel/Shop มีคนแตะน้อย (9% / 3%) และแทบไม่มีใครจ่ายรีเซ็ต — ลองลดราคารีเซ็ต/ไอเทมกระดาน หรือเพิ่ม value ให้คนยอมจ่าย เพื่อดันฐาน paid user 103 คนให้ขยับขึ้น</p>
+          <p class="why"><b>หลักฐาน:</b> Wheel เข้าถึง 8.9% · Shop 3.0% · paid reset 210 ครั้ง = 0.37% ของ WP</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <span class="brand">Ayothaya Event Analysis</span>
+    <span>·</span>
+    <span>TOSM Extreme · Live-Ops Insight</span>
+    <span>·</span>
+    <span>ข้อมูล 3 ชั้น: Feedback · WP/Board · ท้องพระคลัง</span>
+  </footer>
+
+</div>
